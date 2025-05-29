@@ -35,10 +35,10 @@
     {% for row in timetable %}
     <tr>
         <td>{{ row.id }}</td>
-        <td>{{ row.room_name }}</td>
+        <td>{{ row.room }}</td>
         <td>{{ row.day_of_week }}</td>
-        <td>{{ row.time_start }}</td>
-        <td>{{ row.time_end }}</td>
+        <td>{{ row.start_time }}</td>
+        <td>{{ row.end_time }}</td>
         <td>{{ row.subject }}</td>
     </tr>
     {% endfor %}

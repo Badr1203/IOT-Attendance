@@ -29,7 +29,7 @@ def logs():
     date = request.args.get('date')
     room = request.args.get('room')
 
-    query = "SELECT * FROM attendance_logs"
+    query = "SELECT * FROM logs"
     filters = []
     values = []
 
@@ -37,7 +37,7 @@ def logs():
         filters.append("date = %s")
         values.append(date)
     if room:
-        filters.append("room_name = %s")
+        filters.append("room = %s")
         values.append(room)
 
     if filters:
@@ -48,8 +48,8 @@ def logs():
     logs = cursor.fetchall()
 
     # Get unique room names for dropdown
-    cursor.execute("SELECT DISTINCT room_name FROM attendance_logs")
-    rooms = [row['room_name'] for row in cursor.fetchall()]
+    cursor.execute("SELECT DISTINCT room FROM logs")
+    rooms = [row['room'] for row in cursor.fetchall()]
 
     db.close()
     return render_template("logs.html", logs=logs, rooms=rooms)

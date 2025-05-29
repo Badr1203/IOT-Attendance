@@ -27,7 +27,7 @@ def timetable():
             return redirect(url_for('timetable.timetable'))
 
         cursor.execute(
-            "SELECT * FROM timetable WHERE room_name = %s AND day_of_week = %s AND time_start <= %s AND time_end > %s",
+            "SELECT * FROM timetable WHERE room = %s AND day_of_week = %s AND start_time <= %s AND end_time > %s",
             (room, day, start, start),
         )
 
@@ -39,13 +39,13 @@ def timetable():
             return redirect(url_for('timetable.timetable'))
 
         cursor.execute(
-            "INSERT INTO timetable (room_name, day_of_week, time_start, time_end, subject) VALUES (%s, %s, %s, %s, %s)",
+            "INSERT INTO timetable (room, day_of_week, start_time, end_time, subject) VALUES (%s, %s, %s, %s, %s)",
             (room, day, start, end, subject),
         )
         db.commit()
         flash('Timetable entry added successfully!', 'success')
 
-    cursor.execute("SELECT * FROM timetable ORDER BY day_of_week, time_start")
+    cursor.execute("SELECT * FROM timetable ORDER BY day_of_week, start_time")
     rows = cursor.fetchall()
     db.close()
     return render_template("timetable.html", timetable=rows)

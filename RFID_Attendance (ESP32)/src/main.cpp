@@ -27,8 +27,8 @@
 #define TIMEOUT 10000
 
 // Wifi credentials.
-const char *wifi_ssid = "Galaxy A11";
-const char *wifi_password = "11223344";
+const char *wifi_ssid = "XPON-avSH";
+const char *wifi_password = "2002Badr0708";
 const String macAddress = WiFi.macAddress();
 
 // MQtt broker credentials.
@@ -45,7 +45,6 @@ void reconnectMQTT();
 void callback(char *topic, byte *payload, unsigned int length);
 void print_lcd(String message, int row);
 void print_lcd(String msg1, String msg2);
-void blinkLED();
 int parseTime(String timeStr);
 void checkConnections();
 bool publishWithRetry(String uid, String timestamp);
@@ -253,6 +252,7 @@ void lcdSetup()
   print_lcd("LCD Connected!", 0);
 }
 
+// Prints text on lcd and scrolls it
 void print_lcd(String message, int row)
 {
   int scrollIndex = 0;
@@ -280,26 +280,15 @@ void print_lcd(String message, int row)
   delay(500);
 }
 
+// Print text on both rows
 void print_lcd(String msg1, String msg2)
 {
   print_lcd(msg1, 0);
   print_lcd(msg2, 1);
 }
 
-//Blink LED
-void blinkLED() {
-  Serial.println("Making Gesture");
-  for (int i = 0; i < 10; i++)
-  {
-    digitalWrite(LED, LOW);
-    delay(LED_BLINK_SPEED);
-    digitalWrite(LED, HIGH);
-    delay(LED_BLINK_SPEED);
-  }
-}
-
+// Check Wifi and MQTT connections.
 void checkConnections() {
-  delay(100);
   //check wifi connection.
   if (WiFi.status() != WL_CONNECTED) {
     print_lcd("WiFi disconnected.", "Trying to reconnect...");
