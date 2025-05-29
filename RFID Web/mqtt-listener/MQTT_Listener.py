@@ -1,3 +1,4 @@
+import os
 import json
 import threading
 import time as time_t
@@ -6,27 +7,31 @@ from mysql.connector import Error
 import paho.mqtt.client as mqtt
 from datetime import datetime, date, time
 
-# MQTT Config
-MQTT_BROKER = "34.134.142.148"  # or your VM IP
-MQTT_PORT = 1883
+# --- MQTT Config --- #
+# Make sure these are set as environment variables in Docker or deployment server
+MQTT_BROKER = os.environ.get("MQTT_BROKER", "localhost")
+MQTT_PORT = int(os.environ.get("MQTT_PORT", "1883"))
+MQTT_USERNAME = os.environ.get("MQTT_USERNAME", "user")
+MQTT_PASSWORD = os.environ.get("MQTT_PASSWORD", "pass")
 MQTT_ACCESS_TOPIC = "rfid/access"
-MQTT_LOG_PYTHON = "rfid/log/python"
-MQTT_USERNAME = "testVM"
-MQTT_PASSWORD = "1122"
 
-# DB Config
+# --- DB Config --- #
 db_config ={
-    'host':'34.134.142.148',
-    'user':'mqttuser',
-    'password': '1001#testVM1122',
-    'database':'rfid_attendance'
+    'host': os.environ.get('DB_HOST', 'localhost'),
+    'user': os.environ.get('DB_USER', 'root'),
+    'password': os.environ.get('DB_PASSWORD', ''),
+    'database': os.environ.get('DB_NAME', 'your_database_name')
 }
+
+# --- Establish initial DB connection --- #
 conn = mysql.connector.connect(**db_config)
 cursor = conn.cursor(dictionary=True)
-print("LOG: Connected to a database")
+print("LOG: Connected to a database") # Log
 
+# --- Initialize MQTT client --- #
 client = mqtt.Client()
 
+# Identify device by MAC address → returns room
 def identify_device(mac_address) -> str:
     ensure_db_connection()
     cursor.execute("SELECT room FROM device_rooms WHERE mac_address = %s", (mac_address,))
@@ -36,10 +41,10 @@ def identify_device(mac_address) -> str:
         print(f"[WARN] Unknown MAC: {mac_address}")
         return ""
 
-# Get ongoing lesson subject
-#@return ongoing lesson
+# Identify the current subject/lesson in the given room
 def identify_subject(room) -> str:
-    # Current day and time
+    """ Get ongoing lesson subject
+    returns ongoing lesson"""
     now = datetime.now()
     current_day = now.strftime("%A")
     current_time = now.time().replace(microsecond=0)
@@ -73,6 +78,7 @@ def identify_student(uid) -> str:
         print(f"[WARN] UID not registered: {uid}")
         return ""
 
+# Prevent duplicate logging
 def is_logged(uid, lesson_id, subject, date) -> bool:
     try:
         ensure_db_connection()
@@ -93,6 +99,7 @@ def is_logged(uid, lesson_id, subject, date) -> bool:
         else:
             print("Other database error:", err)
         return False
+    
 # --- HANDLERS --- #
 
 # Access log handler
@@ -153,8 +160,7 @@ def handle_access_log(data):
     except Exception as e:
         print(f"[ERROR] Bad access log data: {data} — {e}")
 
-# --- MQTT CALLBACKS --- #
-
+# --- MQTT Event Handlers --- #
 def on_connect(client, userdata, flags, rc):
     print("Connected to MQTT broker")
     client.subscribe(MQTT_ACCESS_TOPIC)
