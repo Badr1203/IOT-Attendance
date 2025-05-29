@@ -1,0 +1,77 @@
+
+/* Container for nav buttons */
+.nav-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+/* Glowing, rounded button style */
+.glow-button {
+    display: inline-block;
+    padding: 10px 20px;
+    border-radius: 12px;
+    text-decoration: none;
+    color: white;
+    font-weight: bold;
+    background: linear-gradient(270deg, #ff416c, #ff4b2b, #1e90ff, #32cd32);
+    background-size: 800% 800%;
+    animation: glowingBackground 8s ease infinite;
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+    transition: transform 0.2s ease;
+}
+
+.glow-button:hover {
+    transform: scale(1.05);
+}
+
+/* Dynamic glowing effect */
+@keyframes glowingBackground {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.flash-message {
+    background-color: #f0f8ff;
+    border-left: 5px solid #2196F3;
+    padding: 10px;
+    margin: 10px 0;
+    font-weight: bold;
+  }
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 20px;
+    padding: 20px;
+}
+
+h2, h3 {
+    color: #333;
+}
+
+form {
+    margin-bottom: 20px;
+}
+
+table {
+    width: 100%;
+    background-color: white;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 10px;
+    border: 1px solid #ccc;
+    text-align: left;
+}
+
+th {
+    background-color: #ddd;
+}
+
+input, select, button {
+    padding: 5px;
+    margin: 5px 0;
+}

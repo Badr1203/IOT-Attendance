@@ -1,0 +1,50 @@
+{% extends "layout.html" %}
+{% block content %}
+<h2>View Attendance Logs</h2>
+
+<form method="get" action="{{ url_for('logs.logs') }}">
+    <label for="date">Select Date:</label>
+    <input type="date" id="date" name="date" value="{{ request.args.get('date', '') }}" required>
+  
+    <label for="room">Select Room:</label>
+    <select id="room" name="room">
+      <option value="">-- All Rooms --</option>
+      {% for room in rooms %}
+        <option value="{{ room }}" {% if room == request.args.get('room') %}selected{% endif %}>{{ room }}</option>
+      {% endfor %}
+    </select>
+  
+    <button type="submit">Filter</button>
+  </form>
+  
+  {% if logs %}
+    <table border="1">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>UID</th>
+          <th>Name</th>
+          <th>Room</th>
+          <th>Subject</th>
+          <th>Date</th>
+          <th>Time</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in logs %}
+          <tr>
+            <td>{{ row.id }}</td>
+            <td>{{ row.uid }}</td>
+            <td>{{ row.student_name }}</td>
+            <td>{{ row.room_name }}</td>
+            <td>{{ row.subject }}</td>
+            <td>{{ row.date }}</td>
+            <td>{{ row.time }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>No logs found.</p>
+  {% endif %}
+  {% endblock %}
