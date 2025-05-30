@@ -1,0 +1,18 @@
+services:
+  web:
+    build: ./myserver
+    ports:
+      - "5000:5000"
+  mosquitto:
+    image: eclipse-mosquitto:latest
+    container_name: mosquitto
+    ports:
+      - "1883:1883"
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "3"
+    volumes:
+      - ./mosquitto:/mosquitto
+    restart: always
