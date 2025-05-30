@@ -70,6 +70,7 @@ MQTT_USERNAME=your_mqtt_username
 MQTT_PASSWORD=your_mqtt_password
 SECRET_KEY=your_flask_secret_key
 ```
+> **Note:** Make sure `.env` is in `.gitignore` to avoid leaking credentials.
 
 ### 3. Setup `secrets.h` (ESP32 Firmware)
 
