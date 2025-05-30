@@ -76,6 +76,10 @@ SECRET_KEY=your_flask_secret_key
 Create a file named `secrets.h` inside the ESP32 firmware directory:
 
 ```cpp
+// secrets.h
+#ifndef SECRETS_H
+#define SECRETS_H
+
 // WIFI credentials
 const char *WIFI_SSID = "your_wifi_ssid";
 const char *WIFI_PASSWORD = "your_wifi_password";
@@ -85,6 +89,8 @@ const char *MQTT_SERVER = "your_broker_ip";
 const int MQTT_PORT = 1883;
 const char *MQTT_USERNAME = "your_mqtt_username";
 const char *MQTT_PASSWORD = "your_mqtt_password";
+
+#endif
 ```
 
 > **Note:** Make sure `secrets.h` is in `.gitignore` to avoid leaking credentials.
