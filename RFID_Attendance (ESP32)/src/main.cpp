@@ -7,6 +7,7 @@
 #include <WiFiUdp.h>
 #include <NTPClient.h>
 #include <PubSubClient.h>
+#include "secrets.h"
 
 // LCD setup.
 #define I2C_ADDRESS 0x27 // Change this if your LCD uses 0x3F or another address
@@ -26,17 +27,8 @@
 #define RETRIES 3
 #define TIMEOUT 10000
 
-// Wifi credentials.
-const char *wifi_ssid = "XPON-avSH";
-const char *wifi_password = "2002Badr0708";
-const String macAddress = WiFi.macAddress();
-
-// MQtt broker credentials.
-const char *mqtt_server = "34.134.142.148";
-const int mqtt_port = 1883;
-const char *mqtt_username = "testVM";
-const char *mqtt_password = "1122";
 const char *mqtt_access = "rfid/access";
+const String macAddress = WiFi.macAddress();
 
 // Function declarations.
 void wifiSetup();
@@ -45,7 +37,6 @@ void reconnectMQTT();
 void callback(char *topic, byte *payload, unsigned int length);
 void print_lcd(String message, int row);
 void print_lcd(String msg1, String msg2);
-int parseTime(String timeStr);
 void checkConnections();
 bool publishWithRetry(String uid, String timestamp);
 
@@ -89,7 +80,7 @@ void setup()
   rfid.PCD_Init(); // Init RFID reader
   print_lcd("RFID Reader Initialized.", 0);
 
-  client.setServer(mqtt_server, mqtt_port);
+  client.setServer(MQTT_SERVER, MQTT_PORT);
   client.setCallback(callback);
   client.setKeepAlive(30); 
 
@@ -98,9 +89,7 @@ void setup()
   delay(100);
   String time = timeClient.getFormattedTime();
   Serial.print("LOG: setup: Time is ");
-  Serial.print(time); 
-  Serial.println("LOG: Exiting setup");
-
+  Serial.println(time); 
 }
 
 void loop()
@@ -192,25 +181,26 @@ bool publishWithRetry(String uid, String timestamp) {
   return false;
 }
 
+// Check Wifi and MQTT connections.
+void checkConnections() {
+  //check wifi connection.
+  if (WiFi.status() != WL_CONNECTED) {
+    print_lcd("WiFi disconnected.", "Trying to reconnect...");
+    wifiSetup();
+  }
 
-// Parses time String "HH:MM:SS" to int seconds
-// @return int seconds
-int parseTime(String timeStr)
-{
-  int hour = timeStr.substring(0, 2).toInt();
-  int minute = timeStr.substring(3, 5).toInt();
-  int second = timeStr.substring(6, 8).toInt();
-
-  int now = hour * 3600 + minute * 60 + second;
-
-  return now;
+  // check MQTT connection.
+  if (!client.connected()) {
+    reconnectMQTT();
+    client.loop();
+  }
 }
 
 void wifiSetup()
 {
   delay(100);
   WiFi.mode(WIFI_STA);
-  WiFi.begin(wifi_ssid, wifi_password);
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
   print_lcd("Connecting to", 0);
 
   // Wait until connected
@@ -287,21 +277,6 @@ void print_lcd(String msg1, String msg2)
   print_lcd(msg2, 1);
 }
 
-// Check Wifi and MQTT connections.
-void checkConnections() {
-  //check wifi connection.
-  if (WiFi.status() != WL_CONNECTED) {
-    print_lcd("WiFi disconnected.", "Trying to reconnect...");
-    wifiSetup();
-  }
-
-  // check MQTT connection.
-  if (!client.connected()) {
-    reconnectMQTT();
-    client.loop();
-  }
-}
-
 void callback(char* topic, byte* payload, unsigned int length) {
   String message = "";
   for (int i = 0; i < length; i++) {
@@ -332,9 +307,9 @@ void callback(char* topic, byte* payload, unsigned int length) {
 }
 
 void reconnectMQTT() {
-  while (!client.connected()) {
+  while (!client.connected() && WiFi.status() == WL_CONNECTED) {
     Serial.print("Attempting MQTT connection...");
-    if (client.connect("ESP32Client", mqtt_username, mqtt_password)) {
+    if (client.connect("ESP32Client", MQTT_USERNAME, MQTT_PASSWORD)) {
       Serial.println("connected");
       Serial.print("Subscribed to: ");
       String subscription = mqtt_access;
