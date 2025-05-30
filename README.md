@@ -60,12 +60,14 @@ cd IOT-Attendance
 Create a `.env` file in both flask_web and mqtt-listener directories or in root directory:
 
 ```ini
-MYSQL_HOST=localhost
-MYSQL_USER=your_db_user
-MYSQL_PASSWORD=your_db_password
-MYSQL_DB=rfid_attendance
+DB_HOST=localhost
+DB_USER=your_db_user
+DB_PASSWORD=your_db_password
+DB_NAME=rfid_attendance
 MQTT_BROKER=your_broker_ip
 MQTT_PORT=1883
+MQTT_USERNAME=your_mqtt_username
+MQTT_PASSWORD=your_mqtt_password
 SECRET_KEY=your_flask_secret_key
 ```
 
@@ -74,10 +76,15 @@ SECRET_KEY=your_flask_secret_key
 Create a file named `secrets.h` inside the ESP32 firmware directory:
 
 ```cpp
-#define WIFI_SSID "your_wifi_ssid"
-#define WIFI_PASSWORD "your_wifi_password"
-#define MQTT_BROKER "your_broker_ip"
-#define MQTT_PORT 1883
+// WIFI credentials
+const char *WIFI_SSID = "your_wifi_ssid";
+const char *WIFI_PASSWORD = "your_wifi_password";
+
+// MQTT credentials
+const char *MQTT_SERVER = "your_broker_ip";
+const int MQTT_PORT = 1883;
+const char *MQTT_USERNAME = "your_mqtt_username";
+const char *MQTT_PASSWORD = "your_mqtt_password";
 ```
 
 > **Note:** Make sure `secrets.h` is in `.gitignore` to avoid leaking credentials.
