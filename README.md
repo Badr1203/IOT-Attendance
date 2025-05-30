@@ -22,8 +22,8 @@ This project is an **IoT-powered RFID attendance system** built with **ESP32**, 
 2. **Python server** receives UID, checks against MySQL database:
 
    * Sends back `Hello, <Name>` if registered and lesson is ongoing
-   * Sends `No lessons` if outside lesson hours
-   * Sends `Not Registered` and publishes UID to `rfid/newcard`
+   * Sends `NO_LESSON` if outside lesson hours
+   * Sends `NOT_REGISTERED` and publishes UID to `rfid/registration`
 3. **Web interface** (Flask) allows users to:
 
    * View **attendance logs**
@@ -71,7 +71,7 @@ SECRET_KEY=your_flask_secret_key
 
 ### 3. Setup `.secrets.h` (ESP32 Firmware)
 
-Create a file named `.secrets.h` inside the ESP32 firmware directory:
+Create a file named `secrets.h` inside the ESP32 firmware directory:
 
 ```cpp
 #define WIFI_SSID "your_wifi_ssid"
@@ -80,7 +80,7 @@ Create a file named `.secrets.h` inside the ESP32 firmware directory:
 #define MQTT_PORT 1883
 ```
 
-> **Note:** Make sure `.secrets.h` is in `.gitignore` to avoid leaking credentials.
+> **Note:** Make sure `secrets.h` is in `.gitignore` to avoid leaking credentials.
 
 ---
 
@@ -111,12 +111,10 @@ http://<server-ip>:5000
 
 ```
 IOT-Attendance/
-├── esp32_firmware/       # Arduino/PlatformIO code for ESP32
-├── web/                  # Flask web application
-├── main.py               # Python MQTT listener and DB handler
-├── docker-compose.yml    # Docker setup
-├── .env                  # Environment variables for Flask & DB
-├── README.md             # Project documentation
+├── ESP32_firmware/            # Arduino/PlatformIO code for ESP32
+├── RFID Web/flask-web         # Flask web application 
+├── RFID Web/mqtt-listener     # Python MQTT listener and DB handler
+├── README.md                  # Project documentation
 ```
 
 ---
@@ -131,13 +129,11 @@ IOT-Attendance/
 
 ## 🚨 MQTT Topics
 
-| Topic                   | Direction    | Description                       |
-| ----------------------- | ------------ | --------------------------------- |
-| `rfid/access`           | ESP → Server | UID scanned by ESP32              |
-| `rfid/response`         | Server → ESP | Response: Hello, No Lessons, etc. |
-| `rfid/newcard`          | Server → Web | Unknown UID notification          |
-| `rfid/request/subject`  | ESP → Server | Request current room/subject      |
-| `rfid/response/getroom` | Server → ESP | Room info based on MAC address    |
+| Topic                       | Direction    | Description                        |
+| --------------------------- | ------------ | ---------------------------------- |
+| `rfid/access`               | ESP → Server | UID scanned by ESP32 + MAC address |
+| `rfid/access/<MAC_address>` | Server → ESP | Response: Hello, No Lessons, etc.  |
+| `rfid/registration`         | ESP →    Web | Unknown UID notification           |
 
 ---
 
@@ -146,6 +142,7 @@ IOT-Attendance/
 * Admin authentication panel
 * Export logs to CSV
 * Add fingerprint or face recognition
+* Mobile App for NFC/Bluetooth attendance
 * Real-time dashboards for admin
 
 ---
@@ -163,9 +160,3 @@ Developed by **Badriddin Karimjonov**
 * Make sure MQTT broker is running and accessible
 * Ensure Flask and Python MQTT scripts use the correct `.env`
 * ESP32 should be connected to WiFi with correct credentials
-
----
-
-## 🌟 License
-
-MIT License
