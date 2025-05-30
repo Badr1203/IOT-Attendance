@@ -135,9 +135,10 @@ IOT-Attendance/
 
 ## 📝 Database Schema
 
-* **students(uid, name)**
-* **timetable(room, start\_time, end\_time, day\_of\_week)**
-* **attendance(id, uid, name, timestamp, room, subject)**
+* **students(id, name, uid, reg\_date)**
+* **timetable(id, room, day\_of\_week, start\_time, end\_time, subject)**
+* **logs(id, uid, lesson\_id, room, date, time)**
+* **device\_rooms(mac\_address, room)**
 
 ---
 
