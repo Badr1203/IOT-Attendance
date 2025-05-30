@@ -57,7 +57,7 @@ cd IOT-Attendance
 
 ### 2. Setup `.env` File (Flask + Python Server)
 
-Create a `.env` file in the root directory:
+Create a `.env` file in both flask_web and mqtt-listener directories or in root directory:
 
 ```ini
 MYSQL_HOST=localhost

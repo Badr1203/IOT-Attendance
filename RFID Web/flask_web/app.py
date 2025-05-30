@@ -1,4 +1,5 @@
 from flask import Flask
+import os
 from auth.routes import auth_bp
 from main.routes import main_bp
 from logs.routes import logs_bp
@@ -9,7 +10,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = "your_secret_key"
+app.secret_key = os.environ.get('SECRET_KEY', 'your_secret_key'),
 
 app.register_blueprint(auth_bp)
 app.register_blueprint(main_bp)
