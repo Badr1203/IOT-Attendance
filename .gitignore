@@ -1,10 +1,35 @@
+# Byte-compiled / optimized / DLL files
 __pycache__/
-*.pyc
-*.pyo
-venv/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# VS Code settings
 .vscode/
-.DS_Store
-*.bin
-.pio/
-.idea/
+
+# Environment variables
 .env
+
+# macOS and Linux files
+.DS_Store
+*.swp
+
+# Environment folders
+venv/
+env/
+
+# Log files
+*.log
+
+# SQLite database
+*.sqlite3
+
+# Credentials and secrets (update as needed)
+config.json
+secrets.json
+
+# Docker
+*.pid
+*.pid.lock
