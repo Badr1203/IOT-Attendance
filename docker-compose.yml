@@ -1,18 +1,33 @@
+version: '3.9'
+
 services:
-  web:
-    build: ./myserver
-    ports:
-      - "5000:5000"
   mosquitto:
-    image: eclipse-mosquitto:latest
+    image: eclipse-mosquitto
     container_name: mosquitto
     ports:
       - "1883:1883"
-    logging:
-      driver: json-file
-      options:
-        max-size: "50m"
-        max-file: "3"
     volumes:
-      - ./mosquitto:/mosquitto
-    restart: always
+      - ./mosquitto/config:/mosquitto/config
+      - ./mosquitto/data:/mosquitto/data
+      - ./mosquitto/log:/mosquitto/log
+    restart: unless-stopped
+
+  flask_web:
+    build: ./flask_web
+    container_name: flask_web
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    depends_on:
+      - mosquitto
+    restart: unless-stopped
+
+  mqtt_listener:
+    build: ./mqtt-listener
+    container_name: mqtt_listener
+    env_file:
+      - .env
+    depends_on:
+      - mosquitto
+    restart: unless-stopped
