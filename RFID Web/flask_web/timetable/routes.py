@@ -1,5 +1,6 @@
-from flask import Blueprint, render_template, session, redirect, request, url_for, flash
+import os
 import mysql.connector
+from flask import Blueprint, render_template, session, redirect, request, url_for, flash
 
 timetable_bp = Blueprint("timetable", __name__, template_folder="../templates")
 
@@ -7,14 +8,15 @@ timetable_bp = Blueprint("timetable", __name__, template_folder="../templates")
 def timetable():
     if not session.get("logged_in"):
         return redirect("/login")
-
-    db = mysql.connector.connect(
-        host="34.134.142.148",
-        user="mqttuser",
-        password="1001#testVM1122",
-        database="rfid_attendance"
-    )
-    cursor = db.cursor(dictionary=True)
+    
+    db_config ={
+        'host': os.environ.get('DB_HOST', 'localhost'),
+        'user': os.environ.get('DB_USER', 'root'),
+        'password': os.environ.get('DB_PASSWORD', ''),
+        'database': os.environ.get('DB_NAME', 'your_database_name')
+    }
+    conn = mysql.connector.connect(**db_config)
+    cursor = conn.cursor(dictionary=True)
 
     if request.method == "POST":
         room = request.form["room"]
@@ -35,17 +37,17 @@ def timetable():
 
         if existing:
             flash('Timetable Conflict', 'error')
-            db.close()
+            conn.close()
             return redirect(url_for('timetable.timetable'))
 
         cursor.execute(
             "INSERT INTO timetable (room, day_of_week, start_time, end_time, subject) VALUES (%s, %s, %s, %s, %s)",
             (room, day, start, end, subject),
         )
-        db.commit()
+        conn.commit()
         flash('Timetable entry added successfully!', 'success')
 
     cursor.execute("SELECT * FROM timetable ORDER BY day_of_week, start_time")
     rows = cursor.fetchall()
-    db.close()
+    conn.close()
     return render_template("timetable.html", timetable=rows)

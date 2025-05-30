@@ -1,9 +1,11 @@
+import os
 from flask import Blueprint, render_template, request, redirect, session
 
 auth_bp = Blueprint("auth", __name__, template_folder="../templates")
 
-USERNAME = "Badriddin"
-PASSWORD = "1122"
+# Login credentials
+USERNAME = os.getenv("ADMIN_USERNAME")
+PASSWORD = os.getenv("ADMIN_PASSWORD")
 
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login():

@@ -1,5 +1,6 @@
-from flask import Blueprint, render_template, session, redirect, url_for, request
+import os
 import mysql.connector
+from flask import Blueprint, render_template, session, redirect, url_for, request
 from functools import wraps
 
 logs_bp = Blueprint("logs", __name__, template_folder="../templates")
@@ -18,13 +19,14 @@ def logs():
     if not session.get("logged_in"):
         return redirect("/login")
 
-    db = mysql.connector.connect(
-        host="34.134.142.148",
-        user="mqttuser",
-        password="1001#testVM1122",
-        database="rfid_attendance"
-    )
-    cursor = db.cursor(dictionary=True)
+    db_config ={
+        'host': os.environ.get('DB_HOST', 'localhost'),
+        'user': os.environ.get('DB_USER', 'root'),
+        'password': os.environ.get('DB_PASSWORD', ''),
+        'database': os.environ.get('DB_NAME', 'your_database_name')
+    }
+    conn = mysql.connector.connect(**db_config)
+    cursor = conn.cursor(dictionary=True)
 
     date = request.args.get('date')
     room = request.args.get('room')
@@ -51,5 +53,5 @@ def logs():
     cursor.execute("SELECT DISTINCT room FROM logs")
     rooms = [row['room'] for row in cursor.fetchall()]
 
-    db.close()
+    conn.close()
     return render_template("logs.html", logs=logs, rooms=rooms)
