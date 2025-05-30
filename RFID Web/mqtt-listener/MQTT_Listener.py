@@ -6,6 +6,8 @@ import mysql.connector
 from mysql.connector import Error
 import paho.mqtt.client as mqtt
 from datetime import datetime, date, time
+from dotenv import load_dotenv
+load_dotenv()
 
 # --- MQTT Config --- #
 # Make sure these are set as environment variables in Docker or deployment server
@@ -125,28 +127,29 @@ def handle_access_log(data):
             client.publish(MQTT_ACCESS_TOPIC + "/" + MAC_address, "UNKNOWN")
             return
 
-        # Check lesson
-        print("LOG: check lesson") #log
-        room = result['room']
-        result = identify_subject(room)
-        if not result:
-            print(f"[INFO] MAC {MAC_address} → Room {room}")
-            client.publish(MQTT_ACCESS_TOPIC + "/" + MAC_address, "NO_LESSON")
-            return
-        
         # Check student
         print("LOG: check student") #log
-        lesson_id = result['id']
-        subject = result['subject']
+        room = result['room']
         result = identify_student(uid)
         if not result:
-            print(f"[INFO] Ongoing lesson: {subject}")
+            print(f"[INFO] MAC {MAC_address} → Room {room}")
             client.publish(MQTT_ACCESS_TOPIC + "/" + MAC_address, "NOT_REGISTERED")
             return
         
-        # Check Dublicate logs
+        # Check lesson
+        print("LOG: check lesson") #log
         student = result['name']
+        result = identify_subject(room)
+        if not result:
+            print(f"[INFO] Student found. Name - {student}")
+            client.publish(MQTT_ACCESS_TOPIC + "/" + MAC_address, "NO_LESSON")
+            return
+        
+        # Check Dublicate logs
+        lesson_id = result['id']
+        subject = result['subject']
         if is_logged(uid, lesson_id, subject, ):
+            print(f"[INFO] Ongoing lesson: {subject}")
             client.publish(MQTT_ACCESS_TOPIC + "/" + MAC_address,"DUBLICATE")
             return
         else:

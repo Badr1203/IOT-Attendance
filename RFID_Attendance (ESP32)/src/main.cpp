@@ -28,6 +28,7 @@
 #define TIMEOUT 10000
 
 const char *mqtt_access = "rfid/access";
+const char *mqtt_register = "rfid/registration";
 const String macAddress = WiFi.macAddress();
 
 // Function declarations.
@@ -290,6 +291,10 @@ void callback(char* topic, byte* payload, unsigned int length) {
   
   if (message == "NOT_REGISTERED") {
     print_lcd("Not Registered", 0);
+    String msg = lastUID;
+    msg += ",";
+    msg += macAddress;
+    client.publish(mqtt_register,msg.c_str());
   } else if (message == "DUBLICATE") {
     Serial.println(message);
     print_lcd("  You    have  ","already Logged.");
