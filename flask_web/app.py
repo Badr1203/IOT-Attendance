@@ -9,7 +9,7 @@ from timetable.routes import timetable_bp
 #load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = os.environ.get('SECRET_KEY', 'your_secret_key'),
+app.secret_key = os.getenv("SECRET_KEY")
 
 app.register_blueprint(auth_bp)
 app.register_blueprint(main_bp)
