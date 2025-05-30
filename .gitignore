@@ -29,6 +29,7 @@ env/
 # Credentials and secrets (update as needed)
 config.json
 secrets.json
+secrets.h
 
 # Docker
 *.pid
