@@ -6,8 +6,8 @@ import mysql.connector
 from mysql.connector import Error
 import paho.mqtt.client as mqtt
 from datetime import datetime, date, time
-from dotenv import load_dotenv
-load_dotenv()
+#from dotenv import load_dotenv
+#load_dotenv()
 
 # --- MQTT Config --- #
 # Make sure these are set as environment variables in Docker or deployment server

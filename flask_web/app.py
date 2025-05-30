@@ -5,9 +5,8 @@ from main.routes import main_bp
 from logs.routes import logs_bp
 from register_rfid.routes import register_rfid_bp
 from timetable.routes import timetable_bp
-from dotenv import load_dotenv
-
-load_dotenv()
+#from dotenv import load_dotenv
+#load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'your_secret_key'),
