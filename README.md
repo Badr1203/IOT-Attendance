@@ -69,7 +69,7 @@ MQTT_PORT=1883
 SECRET_KEY=your_flask_secret_key
 ```
 
-### 3. Setup `.secrets.h` (ESP32 Firmware)
+### 3. Setup `secrets.h` (ESP32 Firmware)
 
 Create a file named `secrets.h` inside the ESP32 firmware directory:
 
