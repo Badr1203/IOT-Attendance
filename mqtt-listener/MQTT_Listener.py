@@ -198,17 +198,25 @@ def keep_db_alive(interval=300):  # 300 seconds = 5 minutes
 def reconnect():
     global conn, cursor
     try:
+        cursor.close()
+    except:
+        pass
+    try:
         conn.close()
     except:
         pass
+
     conn = mysql.connector.connect(**db_config)
     cursor = conn.cursor(dictionary=True)
+    print("[INFO] Reconnected to database")
 def ensure_db_connection():
     global conn, cursor
     try:
         conn.ping(reconnect=True, attempts=3, delay=2)
     except Exception as e:
         print(f"[ERROR] DB ping failed: {e}")
+    if conn.is_connected(): print(f"[INFO] Connection is alive.")
+    else: reconnect()
     cursor = conn.cursor(dictionary=True)
 
 # --- START MQTT --- #
