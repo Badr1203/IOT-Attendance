@@ -1,13 +1,14 @@
 import os
 import json
+import pprint
 import threading
 import time as time_t
 import mysql.connector
 from mysql.connector import Error
 import paho.mqtt.client as mqtt
 from datetime import datetime, date, time
-#from dotenv import load_dotenv
-#load_dotenv()
+from dotenv import load_dotenv
+load_dotenv()
 
 # --- MQTT Config --- #
 # Make sure these are set as environment variables in Docker or deployment server
@@ -28,6 +29,7 @@ db_config ={
 # --- Establish initial DB connection --- #
 conn = mysql.connector.connect(**db_config)
 cursor = conn.cursor(dictionary=True)
+conn.start_transaction(isolation_level='READ COMMITTED')
 print("LOG: Connected to a database") # Log
 
 # --- Initialize MQTT client --- #
@@ -52,11 +54,15 @@ def identify_subject(room) -> str:
     current_time = now.time().replace(microsecond=0)
     print(f"[INFO] {current_day}, {room}, {current_time}")
 
+    query = """SELECT * FROM timetable"""
+    cursor.execute(query)
+    timetable = cursor.fetchall()
+    pprint.pprint(timetable)
     # Query for ongoing  lessons
     query = """
         SELECT id, subject
         FROM timetable
-        WHERE day_of_week = %s AND room = %s AND start_time >= %s AND end_time <= %s
+        WHERE day_of_week = %s AND room = %s AND start_time <= %s AND end_time >= %s
         ORDER BY start_time
         LIMIT 1
     """
@@ -91,7 +97,6 @@ def is_logged(uid, lesson_id, subject, date) -> bool:
         """, (uid, lesson_id, date))
         if cursor.fetchone(): return True
         else:
-            print(f"[INFO] Duplicate log ignored: {uid} on {date} for {subject}") 
             return False
     except Error as err:
         if err.errno == 1452:
@@ -148,15 +153,16 @@ def handle_access_log(data):
         # Check Dublicate logs
         lesson_id = result['id']
         subject = result['subject']
-        if is_logged(uid, lesson_id, subject, ):
-            print(f"[INFO] Ongoing lesson: {subject}")
+        if is_logged(uid, lesson_id, subject, date_str):
+            print(f"[INFO] Duplicate log ignored: {uid} on {date} for {subject}") 
             client.publish(MQTT_ACCESS_TOPIC + "/" + MAC_address,"DUBLICATE")
             return
         else:
+            print(f"[INFO] Ongoing lesson: {subject}")
             # Save log
             cursor.execute("""
                 INSERT INTO logs (uid, lesson_id, room, date, time)
-                VALUES (%s, %s, %s, %s, %s, %s)
+                VALUES (%s, %s, %s, %s, %s)
             """, (uid, lesson_id, room, date_str, current_time))  # Optional: use room if known
             conn.commit()
             client.publish(MQTT_ACCESS_TOPIC + "/" + MAC_address, student)         
@@ -215,8 +221,12 @@ def ensure_db_connection():
         conn.ping(reconnect=True, attempts=3, delay=2)
     except Exception as e:
         print(f"[ERROR] DB ping failed: {e}")
-    if conn.is_connected(): print(f"[INFO] Connection is alive.")
-    else: reconnect()
+    if conn.is_connected(): 
+        print(f"[INFO] Connection is alive.")
+        #cursor.execute("SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED")
+    else:
+        print("[INFO] Reconnecting db") 
+        reconnect()
     cursor = conn.cursor(dictionary=True)
 
 # --- START MQTT --- #
